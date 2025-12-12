@@ -48,7 +48,67 @@ public:
         : id(id), name(name), location(loc), capacity(cap), 
           currentOccupancy(0), isBlocked(false), disasterSeverity(0) {}
 };
-// 3 . shelter class
+// 3 shelter class
+class Shelter {
+public:
+    int id;
+    string name;
+    pair<int, int> location;
+    int capacity;
+    queue<Person> waitingQueue;  // Queue for incoming people
+    vector<Person> acceptedPeople;  // People inside shelter
+    ofstream logFile;
+    
+    Shelter(int id, string name, pair<int, int> loc, int cap) 
+        : id(id), name(name), location(loc), capacity(cap) {
+        // Open log file for this shelter
+        logFile.open("shelter_" + to_string(id) + "_log.txt", ios::app);
+    }
+    
+    ~Shelter() {
+        if (logFile.is_open()) {
+            logFile.close();
+        }
+    }
+    
+    bool hasSpace() {
+        return acceptedPeople.size() < capacity;
+    }
+    bool hasSpace() {
+        return acceptedPeople.size() < capacity;
+    }
+    
+    void addPerson(Person& person) {
+        if (hasSpace()) {
+            acceptedPeople.push_back(person);
+            person.evacuated = true;
+            logFile << "Person " << person.id << " (Age: " << person.age 
+                   << ", Risk: " << person.riskScore << " entered shelter at "
+                   << getCurrentTime() << endl;
+        } else {
+            waitingQueue.push(person);
+            logFile << "Person " << person.id << " added to waiting queue at "
+                   << getCurrentTime() << endl;
+        }
+    }
+    
+    string getCurrentTime() {
+        time_t now = time(0);
+        char* dt = ctime(&now);
+        string timeStr(dt);
+        timeStr.pop_back();  // Remove newline
+        return timeStr;
+    }
+};
+class Road {
+    public:
+    pair<int,int> start;
+    pair<int,int> end;
+    bool isblocked;
+    int distance;
+    Road(pair<int,int> s, pair<int,int> e, int dist)
+    : start(s),end(e), isblocked(false),distance(dist){}
+};
 int main(){
     return 0;
 }
