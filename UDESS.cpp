@@ -48,7 +48,8 @@ public:
         : id(id), name(name), location(loc), capacity(cap), 
           currentOccupancy(0), isBlocked(false), disasterSeverity(0) {}
 };
+// 3 . shelter class
 int main(){
     return 0;
 }
-// 3. Shelter Class
+
