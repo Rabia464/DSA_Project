@@ -109,6 +109,16 @@ class Road {
     Road(pair<int,int> s, pair<int,int> e, int dist)
     : start(s),end(e), isblocked(false),distance(dist){}
 };
+class disasterNode{
+    public:
+    int buildingID;
+    int severity;
+    disasterNode* left;
+     disasterNode* right;
+      disasterNode(int bid, int sev) 
+        : buildingID(bid), severity(sev), left(nullptr), right(nullptr) {}
+};
+
 int main(){
     return 0;
 }
