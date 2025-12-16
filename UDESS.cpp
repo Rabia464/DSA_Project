@@ -118,6 +118,57 @@ class disasterNode{
       disasterNode(int bid, int sev) 
         : buildingID(bid), severity(sev), left(nullptr), right(nullptr) {}
 };
+// 6. BST for Disaster Severity
+class DisasterTree {
+private:
+    disasterNode* root;
+    
+    disasterNode* insert(disasterNode* node, int buildingId, int severity) {
+        if (node == nullptr) {
+            return new disasterNode(buildingId, severity);
+        }
+        
+        if (severity < node->severity) {
+            node->left = insert(node->left, buildingId, severity);
+        } else {
+            node->right = insert(node->right, buildingId, severity);
+        }
+        
+        return node;
+    }
+    
+    void inOrderTraversal(disasterNode* node, vector<pair<int, int>>& result) {
+        if (node != nullptr) {
+            inOrderTraversal(node->left, result);
+            result.push_back({node->buildingID, node->severity});
+            inOrderTraversal(node->right, result);
+        }
+    }
+    
+public:
+    DisasterTree() : root(nullptr) {}
+    
+    void insert(int buildingId, int severity) {
+        root = insert(root, buildingId, severity);
+    }
+    
+    vector<pair<int, int>> getAllDisasters() {
+        vector<pair<int, int>> result;
+        inOrderTraversal(root, result);
+        return result;
+    }
+    
+    int getSeverity(int buildingId) {
+        // Search for building in tree
+        vector<pair<int, int>> disasters = getAllDisasters();
+        for (auto& d : disasters) {
+            if (d.first == buildingId) {
+                return d.second;
+            }
+        }
+        return 0;
+    }
+};
 
 int main(){
     return 0;
