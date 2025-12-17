@@ -445,7 +445,130 @@ public:
         
         return nearestId;
     }
+    void runEvacuation() {
+        mainLogFile << "\n========== EVACUATION SIMULATION STARTED ==========\n";
+        mainLogFile << "Time: " << getCurrentTime() << "\n\n";
+        
+        priority_queue<Person> tempQueue = evacuationQueue;
+        
+        while (!tempQueue.empty()) {
+            Person person = tempQueue.top();
+            tempQueue.pop();
+            
+            if (person.evacuated) continue;
+            
+            // Find nearest shelter
+            int shelterId = findNearestShelter(person.location);
+            if (shelterId == -1) {
+                cout << "No shelters available for person " << person.id << endl;
+                continue;
+            }
+            
+            // Find shelter
+            Shelter* shelter = nullptr;
+            for (auto& s : shelters) {
+                if (s.id == shelterId) {
+                    shelter = &s;
+                    break;
+                }
+            }
+            
+            if (shelter) {
+                // Calculate path using BFS
+                pair<int, int> oldLocation = person.location;
+                vector<pair<int, int>> path = bfsShortestPath(person.location, shelter->location);
+                
+                // Track each step in the path
+                for (size_t i = 1; i < path.size(); i++) {
+                    movementHistory.addMovement(person.id, path[i-1], path[i]);
+                }
+                
+                person.location = shelter->location;
+                person.targetShelterId = shelterId;
+                
+                // Add to shelter
+                shelter->addPerson(person);
+                
+                // Update person in main list
+                for (auto& p : people) {
+                    if (p.id == person.id) {
+                        p = person;
+                        break;
+                    }
+                }
+                
+                mainLogFile << "Person " << person.id << " evacuated to Shelter " 
+                           << shelterId << " (Risk: " << person.riskScore 
+                           << ", Path length: " << path.size() << " steps)\n";
+            }
+        }
+        
+        mainLogFile << "\n========== EVACUATION SIMULATION COMPLETED ==========\n\n";
+        cout << "Evacuation simulation completed!" << endl;
+    }
     
+    // 6. Sort dangerous buildings
+    void sortDangerousBuildings() {
+        sort(buildings.begin(), buildings.end(), 
+             [](const Building& a, const Building& b) {
+                 return a.disasterSeverity > b.disasterSeverity;
+             });
+        
+        cout << "\nDangerous Buildings (sorted by severity):\n";
+        for (const auto& building : buildings) {
+            if (building.disasterSeverity > 0) {
+                cout << "  " << building.name << " (ID: " << building.id 
+                     << ") - Severity: " << building.disasterSeverity << endl;
+            }
+        }
+    }
+    
+    // 7. Print statistics
+    void printStatistics() {
+        cout << "\n========== SIMULATION STATISTICS ==========\n";
+        cout << "Total Buildings: " << buildings.size() << endl;
+        cout << "Total Shelters: " << shelters.size() << endl;
+        cout << "Total People: " << people.size() << endl;
+        
+        int evacuated = 0;
+        for (const auto& person : people) {
+            if (person.evacuated) evacuated++;
+        }
+        
+        cout << "Evacuated: " << evacuated << endl;
+        cout << "Remaining: " << (people.size() - evacuated) << endl;
+        
+        cout << "\nShelter Status:\n";
+        for (const auto& shelter : shelters) {
+            cout << "  Shelter " << shelter.id << " (" << shelter.name 
+                 << "): " << shelter.acceptedPeople.size() << "/" 
+                 << shelter.capacity << " capacity\n";
+        }
+    }
+    
+    // 8. Undo last action
+    void undo() {
+        string action = undoStack.undo();
+        cout << "Undone: " << action << endl;
+    }
+    
+    string getCurrentTime() {
+        time_t now = time(0);
+        char* dt = ctime(&now);
+        string timeStr(dt);
+        timeStr.pop_back();
+        return timeStr;
+    }
+    
+    // Getter methods for testing
+    vector<Building>& getBuildings() { return buildings; }
+    vector<Shelter>& getShelters() { return shelters; }
+    vector<Person>& getPeople() { return people; }
+    
+    // Access movement history
+    void printPersonHistory(int personId) {
+        movementHistory.printHistory(personId);
+    }
 };
 int main(){
     cout<<"hello";
