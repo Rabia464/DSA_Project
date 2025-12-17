@@ -223,7 +223,230 @@ public:
         }
     }
 };
+class UndoStack{
+    private:
+        stack<string> undoStack;
+    public:
+        void pushAction(string action){
+        undoStack.push(action);
+    }
+    string undo(){
+        if (undoStack.empty()){
+            return "NO actipns to undo";
+        }
+        string lastAction= undoStack.top();
+        undoStack.pop();
+        return lastAction;
+    }
+    bool isEmpty(){
+        return undoStack.empty();
+    }
 
+};
+
+class CitySystem {
+private:
+    vector<Building> buildings;
+    vector<Shelter> shelters;
+    vector<Road> roads;
+    vector<Person> people;
+    priority_queue<Person> evacuationQueue;  // Priority queue for evacuation
+    DisasterTree disasterTree;
+    MovementHistory movementHistory;
+    UndoStack undoStack;
+    ofstream mainLogFile;
+     // BFS for shortest path (considers blocked roads)
+    vector<pair<int, int>> bfsShortestPath(pair<int, int> start, pair<int, int> end) {
+        // Build adjacency list from roads
+        map<pair<int, int>, vector<pair<pair<int, int>, int>>> graph;
+        
+        for (const auto& road : roads) {
+            if (!road.isblocked) {  // Only use unblocked roads
+                graph[road.start].push_back({road.end, road.distance});
+                graph[road.end].push_back({road.start, road.distance});
+            }
+        }
+        
+        // BFS to find shortest path
+        queue<pair<int, int>> q;
+        map<pair<int, int>, pair<int, int>> parent;  // For path reconstruction
+        map<pair<int, int>, bool> visited;
+        
+        q.push(start);
+        visited[start] = true;
+        parent[start] = {-1, -1};  // Sentinel value
+        
+        bool found = false;
+        
+        while (!q.empty() && !found) {
+            pair<int, int> current = q.front();
+            q.pop();
+            
+            if (current == end) {
+                found = true;
+                break;
+            }
+            
+            // Check direct neighbors from roads
+            if (graph.find(current) != graph.end()) {
+                for (const auto& neighbor : graph[current]) {
+                    if (!visited[neighbor.first]) {
+                        visited[neighbor.first] = true;
+                        parent[neighbor.first] = current;
+                        q.push(neighbor.first);
+                    }
+                }
+            }
+            
+            // Also allow direct movement if no road network (fallback)
+            // This handles cases where start/end aren't on road network
+            vector<pair<int, int>> directions = {{0, 1}, {1, 0}, {0, -1}, {-1, 0}};
+            for (const auto& dir : directions) {
+                pair<int, int> next = {current.first + dir.first, current.second + dir.second};
+                if (!visited[next] && graph.find(next) == graph.end()) {
+                    // Allow direct movement if not on road network
+                    visited[next] = true;
+                    parent[next] = current;
+                    q.push(next);
+                }
+            }
+        }
+        
+        // Reconstruct path
+        vector<pair<int, int>> path;
+        if (found) {
+            pair<int, int> current = end;
+            while (current != make_pair(-1, -1)) {
+                path.push_back(current);
+                current = parent[current];
+            }
+            reverse(path.begin(), path.end());
+        } else {
+            // If no path found, return direct path (fallback)
+            path.push_back(start);
+            path.push_back(end);
+        }
+        
+        return path;
+    }
+    
+    // Calculate distance between two points
+    int calculateDistance(pair<int, int> a, pair<int, int> b) {
+        return abs(a.first - b.first) + abs(a.second - b.second);
+    }
+    
+public:
+    CitySystem() {
+        mainLogFile.open("evacuation_report.txt", ios::app);
+    }
+    
+    ~CitySystem() {
+        if (mainLogFile.is_open()) {
+            mainLogFile.close();
+        }
+    }
+    
+    // 1. Load city map from file
+    bool loadCityMap(string filename) {
+        ifstream file(filename);
+        if (!file.is_open()) {
+            cout << "Error: Could not open file " << filename << endl;
+            return false;
+        }
+        
+        string line;
+        while (getline(file, line)) {
+            if (line.empty() || line[0] == '#') continue;
+            
+            stringstream ss(line);
+            string type;
+            ss >> type;
+            
+            if (type == "BUILDING") {
+                int id, x, y, cap;
+                string name;
+                ss >> id >> name >> x >> y >> cap;
+                buildings.push_back(Building(id, name, {x, y}, cap));
+            }
+            else if (type == "SHELTER") {
+                int id, x, y, cap;
+                string name;
+                ss >> id >> name >> x >> y >> cap;
+                shelters.push_back(Shelter(id, name, {x, y}, cap));
+            }
+            else if (type == "ROAD") {
+                int x1, y1, x2, y2, dist;
+                ss >> x1 >> y1 >> x2 >> y2 >> dist;
+                roads.push_back(Road({x1, y1}, {x2, y2}, dist));
+            }
+        }
+        
+        file.close();
+        undoStack.pushAction("Loaded city map from " + filename);
+        cout << "City map loaded successfully!" << endl;
+        return true;
+    }
+    
+    // 2. Load disaster severity tree
+    bool loadDisasterSeverity(string filename) {
+        ifstream file(filename);
+        if (!file.is_open()) {
+            cout << "Error: Could not open file " << filename << endl;
+            return false;
+        }
+        
+        string line;
+        while (getline(file, line)) {
+            if (line.empty() || line[0] == '#') continue;
+            
+            stringstream ss(line);
+            int buildingId, severity;
+            ss >> buildingId >> severity;
+            disasterTree.insert(buildingId, severity);
+            
+            // Update building disaster severity
+            for (auto& building : buildings) {
+                if (building.id == buildingId) {
+                    building.disasterSeverity = severity;
+                    building.isBlocked = (severity >= 7);
+                }
+            }
+        }
+        
+        file.close();
+        undoStack.pushAction("Loaded disaster severity data");
+        cout << "Disaster severity data loaded!" << endl;
+        return true;
+    }
+    
+    // 3. Add person to simulation
+    void addPerson(int id, int age, int riskScore, pair<int, int> location) {
+        Person person(id, age, riskScore, location);
+        people.push_back(person);
+        evacuationQueue.push(person);
+        undoStack.pushAction("Added person " + to_string(id));
+        cout << "Person " << id << " added to simulation" << endl;
+    }
+    
+    // 4. Find nearest shelter for a person
+    int findNearestShelter(pair<int, int> location) {
+        if (shelters.empty()) return -1;
+        
+        int nearestId = shelters[0].id;
+        int minDistance = calculateDistance(location, shelters[0].location);
+        
+        for (auto& shelter : shelters) {
+            int dist = calculateDistance(location, shelter.location);
+            if (dist < minDistance) {
+                minDistance = dist;
+                nearestId = shelter.id;
+            }
+        }
+        
+        return nearestId;
+    }
+    
+};
 int main(){
     return 0;
 }
