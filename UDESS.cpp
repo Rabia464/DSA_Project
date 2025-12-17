@@ -169,6 +169,60 @@ public:
         return 0;
     }
 };
+// 7. Linked List Node for Movement History
+class MovementNode {
+public:
+    int personId;
+    pair<int, int> from;
+    pair<int, int> to;
+    string timestamp;
+    MovementNode* next;
+    
+    MovementNode(int pid, pair<int, int> f, pair<int, int> t, string ts) 
+        : personId(pid), from(f), to(t), timestamp(ts), next(nullptr) {}
+};
+
+// 8. Linked List for Movement History
+class MovementHistory {
+private:
+    MovementNode* head;
+    
+public:
+    MovementHistory() : head(nullptr) {}
+    
+    void addMovement(int personId, pair<int, int> from, pair<int, int> to) {
+        time_t now = time(0);
+        char* dt = ctime(&now);
+        string timeStr(dt);
+        timeStr.pop_back();
+        
+        MovementNode* newNode = new MovementNode(personId, from, to, timeStr);
+        newNode->next = head;
+        head = newNode;
+    }
+    
+    vector<MovementNode*> getPersonHistory(int personId) {
+        vector<MovementNode*> history;
+        MovementNode* current = head;
+        while (current != nullptr) {
+            if (current->personId == personId) {
+                history.push_back(current);
+            }
+            current = current->next;
+        }
+        return history;
+    }
+    
+    void printHistory(int personId) {
+        vector<MovementNode*> history = getPersonHistory(personId);
+        cout << "Movement History for Person " << personId << ":\n";
+        for (auto* node : history) {
+            cout << "  From (" << node->from.first << "," << node->from.second 
+                 << ") to (" << node->to.first << "," << node->to.second 
+                 << ") at " << node->timestamp << endl;
+        }
+    }
+};
 
 int main(){
     return 0;
