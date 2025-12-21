@@ -1,0 +1,33 @@
+
+========== EVACUATION SIMULATION STARTED ==========
+Time: Fri Dec 19 21:53:27 2025
+
+Person 4 evacuated to Shelter 1 (Risk: 10, Path length: 93 steps)
+Person 1 evacuated to Shelter 1 (Risk: 9, Path length: 93 steps)
+Person 3 evacuated to Shelter 1 (Risk: 8, Path length: 91 steps)
+Person 2 evacuated to Shelter 1 (Risk: 6, Path length: 92 steps)
+
+========== EVACUATION SIMULATION COMPLETED ==========
+
+
+========== EVACUATION SIMULATION STARTED ==========
+Time: Sun Dec 21 13:30:31 2025
+
+Person 4 evacuated to Shelter 1 (Risk: 10, Path length: 2 steps)
+Person 1 evacuated to Shelter 1 (Risk: 9, Path length: 2 steps)
+Person 3 evacuated to Shelter 1 (Risk: 8, Path length: 2 steps)
+Person 2 evacuated to Shelter 1 (Risk: 6, Path length: 2 steps)
+
+========== EVACUATION SIMULATION COMPLETED ==========
+
+
+========== EVACUATION SIMULATION STARTED ==========
+Time: Sun Dec 21 13:33:51 2025
+
+Person 4 evacuated to Shelter 1 (Risk: 10, Path length: 2 steps)
+Person 1 evacuated to Shelter 1 (Risk: 9, Path length: 2 steps)
+Person 3 evacuated to Shelter 1 (Risk: 8, Path length: 2 steps)
+Person 2 evacuated to Shelter 1 (Risk: 6, Path length: 2 steps)
+
+========== EVACUATION SIMULATION COMPLETED ==========
+

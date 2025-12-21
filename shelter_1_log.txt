@@ -1,0 +1,12 @@
+Person 4 (Age: 60, Risk: 10 entered shelter at Fri Dec 19 21:53:27 2025
+Person 1 (Age: 25, Risk: 9 entered shelter at Fri Dec 19 21:53:28 2025
+Person 3 (Age: 30, Risk: 8 entered shelter at Fri Dec 19 21:53:28 2025
+Person 2 (Age: 45, Risk: 6 entered shelter at Fri Dec 19 21:53:28 2025
+Person 4 (Age: 60, Risk: 10 entered shelter at Sun Dec 21 13:30:31 2025
+Person 1 (Age: 25, Risk: 9 entered shelter at Sun Dec 21 13:30:31 2025
+Person 3 (Age: 30, Risk: 8 entered shelter at Sun Dec 21 13:30:31 2025
+Person 2 (Age: 45, Risk: 6 entered shelter at Sun Dec 21 13:30:31 2025
+Person 4 (Age: 60, Risk: 10 entered shelter at Sun Dec 21 13:33:51 2025
+Person 1 (Age: 25, Risk: 9 entered shelter at Sun Dec 21 13:33:51 2025
+Person 3 (Age: 30, Risk: 8 entered shelter at Sun Dec 21 13:33:51 2025
+Person 2 (Age: 45, Risk: 6 entered shelter at Sun Dec 21 13:33:51 2025

@@ -1,0 +1,5 @@
+# Disaster Severity File
+# Format: BUILDING_ID SEVERITY (0-10)
+1 8
+2 5
+3 9
